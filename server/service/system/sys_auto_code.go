@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	ast2 "github.com/flipped-aurora/gin-vue-admin/server/utils/ast"
 	"io"
 	"mime/multipart"
 	"os"
@@ -13,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+
+	ast2 "github.com/flipped-aurora/gin-vue-admin/server/utils/ast"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/resource/autocode_template/subcontract"
 	cp "github.com/otiai10/copy"
@@ -145,8 +146,19 @@ func (autoCodeService *AutoCodeService) PreviewTemp(autoCode system.AutoCodeStru
 		if autoCode.Fields[i].FieldType == "picture" {
 			autoCode.HasPic = true
 		}
+		if autoCode.Fields[i].FieldType == "video" {
+			autoCode.HasPic = true
+		}
+		if autoCode.Fields[i].FieldType == "richtext" {
+			autoCode.HasRichText = true
+		}
+		if autoCode.Fields[i].FieldType == "pictures" {
+			autoCode.HasPic = true
+			autoCode.NeedJSON = true
+		}
 		if autoCode.Fields[i].FieldType == "file" {
 			autoCode.HasFile = true
+			autoCode.NeedJSON = true
 		}
 	}
 	dataList, _, needMkdir, err := autoCodeService.getNeedList(&autoCode)
@@ -241,7 +253,18 @@ func (autoCodeService *AutoCodeService) CreateTemp(autoCode system.AutoCodeStruc
 		if autoCode.Fields[i].FieldType == "picture" {
 			autoCode.HasPic = true
 		}
+		if autoCode.Fields[i].FieldType == "video" {
+			autoCode.HasPic = true
+		}
+		if autoCode.Fields[i].FieldType == "richtext" {
+			autoCode.HasRichText = true
+		}
+		if autoCode.Fields[i].FieldType == "pictures" {
+			autoCode.NeedJSON = true
+			autoCode.HasPic = true
+		}
 		if autoCode.Fields[i].FieldType == "file" {
+			autoCode.NeedJSON = true
 			autoCode.HasFile = true
 		}
 	}
@@ -304,8 +327,8 @@ func (autoCodeService *AutoCodeService) CreateTemp(autoCode system.AutoCodeStruc
 			// 在gorm.go 注入 自动迁移
 			path := filepath.Join(global.GVA_CONFIG.AutoCode.Root,
 				global.GVA_CONFIG.AutoCode.Server, global.GVA_CONFIG.AutoCode.SInitialize, "gorm.go")
-			autoCode.BusinessDB = utils.MaheHump(autoCode.BusinessDB) // 这里将 数据库中间存在 - 的转换为驼峰
-			ast2.AddRegisterTablesAst(path, "RegisterTables", autoCode.Package, autoCode.BusinessDB, autoCode.StructName)
+			varDB := utils.MaheHump(autoCode.BusinessDB)
+			ast2.AddRegisterTablesAst(path, "RegisterTables", autoCode.Package, varDB, autoCode.BusinessDB, autoCode.StructName)
 		}
 
 		{
@@ -342,6 +365,7 @@ func (autoCodeService *AutoCodeService) CreateTemp(autoCode system.AutoCodeStruc
 				autoCode.TableName,
 				idBf.String(),
 				autoCode.Package,
+				autoCode.BusinessDB,
 			)
 		} else {
 			err = AutoCodeHistoryServiceApp.CreateAutoCodeHistory(
@@ -353,6 +377,7 @@ func (autoCodeService *AutoCodeService) CreateTemp(autoCode system.AutoCodeStruc
 				autoCode.StructName,
 				idBf.String(),
 				autoCode.Package,
+				autoCode.BusinessDB,
 			)
 		}
 	}
@@ -459,37 +484,37 @@ func (autoCodeService *AutoCodeService) AutoCreateApi(a *system.AutoCodeStruct) 
 		{
 			Path:        "/" + a.Abbreviation + "/" + "create" + a.StructName,
 			Description: "新增" + a.Description,
-			ApiGroup:    a.Abbreviation,
+			ApiGroup:    a.Description,
 			Method:      "POST",
 		},
 		{
 			Path:        "/" + a.Abbreviation + "/" + "delete" + a.StructName,
 			Description: "删除" + a.Description,
-			ApiGroup:    a.Abbreviation,
+			ApiGroup:    a.Description,
 			Method:      "DELETE",
 		},
 		{
 			Path:        "/" + a.Abbreviation + "/" + "delete" + a.StructName + "ByIds",
 			Description: "批量删除" + a.Description,
-			ApiGroup:    a.Abbreviation,
+			ApiGroup:    a.Description,
 			Method:      "DELETE",
 		},
 		{
 			Path:        "/" + a.Abbreviation + "/" + "update" + a.StructName,
 			Description: "更新" + a.Description,
-			ApiGroup:    a.Abbreviation,
+			ApiGroup:    a.Description,
 			Method:      "PUT",
 		},
 		{
 			Path:        "/" + a.Abbreviation + "/" + "find" + a.StructName,
 			Description: "根据ID获取" + a.Description,
-			ApiGroup:    a.Abbreviation,
+			ApiGroup:    a.Description,
 			Method:      "GET",
 		},
 		{
 			Path:        "/" + a.Abbreviation + "/" + "get" + a.StructName + "List",
 			Description: "获取" + a.Description + "列表",
-			ApiGroup:    a.Abbreviation,
+			ApiGroup:    a.Description,
 			Method:      "GET",
 		},
 	}

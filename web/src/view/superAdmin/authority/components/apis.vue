@@ -1,8 +1,16 @@
 <template>
   <div>
-    <div class="clearfix sticky-button">
-      <el-input v-model="filterText" class="fitler" placeholder="筛选" />
-      <el-button class="fl-right" type="primary" @click="authApiEnter">确 定</el-button>
+    <div class="sticky top-0.5 z-10 bg-white">
+      <el-input
+        v-model="filterText"
+        class="w-3/5"
+        placeholder="筛选"
+      />
+      <el-button
+        class="float-right"
+        type="primary"
+        @click="authApiEnter"
+      >确 定</el-button>
     </div>
     <div class="tree-content">
       <el-tree
@@ -20,17 +28,17 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  name: 'Apis',
-}
-</script>
 
 <script setup>
 import { getAllApis } from '@/api/api'
 import { UpdateCasbin, getPolicyPathByAuthorityId } from '@/api/casbin'
 import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+
+defineOptions({
+  name: 'Apis',
+})
+
 const props = defineProps({
   row: {
     default: function() {
@@ -134,6 +142,3 @@ watch(filterText, (val) => {
 
 </script>
 
-<style lang="scss" scoped>
-@import "@/style/button.scss";
-</style>

@@ -1,6 +1,7 @@
 package initialize
 
 import (
+	swaggerFiles "github.com/swaggo/files"
 	"net/http"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/docs"
@@ -9,23 +10,27 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/router"
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
 // 初始化总路由
 
 func Routers() *gin.Engine {
-	Router := gin.Default()
+	
+	// 设置为发布模式
+	if global.GVA_CONFIG.System.Env == "public" {
+		gin.SetMode(gin.ReleaseMode) //DebugMode ReleaseMode TestMode
+	}
+	Router := gin.New()
+	
 	InstallPlugin(Router) // 安装插件
 	systemRouter := router.RouterGroupApp.System
 	exampleRouter := router.RouterGroupApp.Example
 	// 如果想要不使用nginx代理前端网页，可以修改 web/.env.production 下的
 	// VUE_APP_BASE_API = /
 	// VUE_APP_BASE_PATH = http://localhost
-	// 然后执行打包命令 npm run build。在打开下面4行注释
-	// Router.LoadHTMLGlob("./dist/*.html") // npm打包成dist的路径
+	// 然后执行打包命令 npm run build。在打开下面3行注释
 	// Router.Static("/favicon.ico", "./dist/favicon.ico")
-	// Router.Static("/static", "./dist/assets")   // dist里面的静态资源
+	// Router.Static("/assets", "./dist/assets")   // dist里面的静态资源
 	// Router.StaticFile("/", "./dist/index.html") // 前端网页入口页面
 
 	Router.StaticFS(global.GVA_CONFIG.Local.StorePath, http.Dir(global.GVA_CONFIG.Local.StorePath)) // 为用户头像和文件提供静态地址

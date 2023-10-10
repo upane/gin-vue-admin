@@ -16,7 +16,7 @@ export default ({
   command,
   mode
 }) => {
-  const NODE_ENV = process.env.NODE_ENV || 'development'
+  const NODE_ENV = mode || 'development'
   const envFiles = [
     `.env.${NODE_ENV}`
   ]
@@ -39,6 +39,14 @@ export default ({
   }
 
   const esbuild = {}
+
+  const rollupOptions = {
+    output: {
+      entryFileNames: '087AC4D233B64EB0[name].js',
+      chunkFileNames: '087AC4D233B64EB0[name].js',
+      assetFileNames: '087AC4D233B64EB0[name].[ext]',
+    },
+  }
 
   const config = {
     base: './', // index.html文件所在位置
@@ -68,7 +76,7 @@ export default ({
       manifest: false, // 是否产出manifest.json
       sourcemap: false, // 是否产出sourcemap.json
       outDir: 'dist', // 产出目录
-      // rollupOptions,
+      rollupOptions,
     },
     esbuild,
     optimizeDeps,
